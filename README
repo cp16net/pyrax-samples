@@ -1,1 +1,11 @@
-    Just some sample code using the Rackspace Cloud SDKs
+Just some sample code using the Rackspace Cloud SDKs
+
+uploadFile.py
+    Allows you to sync up a folder to cloud files or upload just a file.
+
+    Try it out by using these cmds:
+
+    ./uploadFile.py test.tgz
+    ./uploadFile.py .
+    python uploadFile.py test.tgz
+    python uploadFile.py .
