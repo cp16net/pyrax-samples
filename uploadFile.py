@@ -29,6 +29,7 @@ except:
 
 
 CONTAINER_NAME = 'files'
+CREDENTIALS = "~/.rackspace_cloud_credentials_2"
 
 
 def main():
@@ -40,10 +41,10 @@ def main():
 
     # setup auth for cloud files
     try:
-        creds_file = os.path.expanduser("~/.rackspace_cloud_credential")
-        pyrax.set_credential_file(creds_file)
+        creds_file = os.path.expanduser(CREDENTIALS)
+        pyrax.set_credential_file(creds_file, region="DFW")
     except pyrax.exceptions.FileNotFound, e:
-        print("Setup the ~/.rackspace_cloud_credential file with this info.")
+        print("Setup the ~/.rackspace_cloud_credentials file with this info.")
         print("[rackspace_cloud]")
         print("username = username")
         print("api_key = api_key")
@@ -52,17 +53,21 @@ def main():
     cf = pyrax.cloudfiles
 
     # gets the container and get list of files
-    cont = cf.get_container(CONTAINER_NAME)
+    try:
+        cont = cf.get_container(CONTAINER_NAME)
+    except pyrax.exceptions.NoSuchContainer, e:
+        print(cf.get_all_containers())
+        sys.exit("Container(%s) was not found." % CONTAINER_NAME)
+
     cont_files = cont.get_objects()
     print(cont_files)
 
     # get the file name
     upload_this = sys.argv[1]
-    print(upload_this)
     file_name_to_upload = os.path.basename(upload_this)
     print(file_name_to_upload)
 
-    if is_new_file_to_upload():
+    if is_new_file_to_upload(file_name_to_upload, cont_files):
         print("Uploading file...")
         cont.upload_file(upload_this)
         print(cont.get_objects())
@@ -73,10 +78,10 @@ def main():
         sys.exit("FILE ALREADY EXISTS '%s'" % file_name_to_upload)
 
 
-def is_new_file_to_upload():
+def is_new_file_to_upload(file_name, containter_files):
         # validate the file is not already in the container
-        name_list = [f.name for f in cont_files]
-        if file_name_to_upload in name_list:
+        name_list = [f.name for f in containter_files]
+        if file_name in name_list:
             return 0
         return 1
 
