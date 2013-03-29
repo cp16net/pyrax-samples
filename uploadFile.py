@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-This is a script that uploads a file that is given to cloud files.
+This is a script that uploads a file or syncs a folder to cloud files.
 
 prerequisites:
 * have a rackspace cloud account
@@ -12,8 +12,10 @@ username = username
 api_key = api_key
 
 Running the script:
+./uploadFile.py test.tgz
+./uploadFile.py .
 python uploadFile.py test.tgz
-
+python uploadFile.py .
 """
 
 
@@ -65,20 +67,28 @@ def main():
 
     # get the file name
     upload_this = sys.argv[1]
-    file_name_to_upload = os.path.basename(upload_this)
-    print(file_name_to_upload)
-
-    # check for new file and upload it or dont.
-    if is_new_file_to_upload(file_name_to_upload, cont_files):
-        # new file so upload it
-        print("Uploading file...")
-        cont.upload_file(upload_this)
+    if os.path.isdir(upload_this):
+        # sync the folder
+        cf.sync_folder_to_container(upload_this, cont)
         print(cont.get_objects())
         print("DONE!")
+
     else:
-        # not a new file so we exit with message
-        print("Expecting a different file name to upload.")
-        sys.exit("FILE ALREADY EXISTS '%s'" % file_name_to_upload)
+        # upload the single file
+        file_name_to_upload = os.path.basename(upload_this)
+        print(file_name_to_upload)
+
+        # check for new file and upload it or dont.
+        if is_new_file_to_upload(file_name_to_upload, cont_files):
+            # new file so upload it
+            print("Uploading file...")
+            cont.upload_file(upload_this)
+            print(cont.get_objects())
+            print("DONE!")
+        else:
+            # not a new file so we exit with message
+            print("Expecting a different file name to upload.")
+            sys.exit("FILE ALREADY EXISTS '%s'" % file_name_to_upload)
 
 
 def is_new_file_to_upload(file_name, containter_files):
