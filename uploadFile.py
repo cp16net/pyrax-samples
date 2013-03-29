@@ -42,6 +42,7 @@ def main():
     # setup auth for cloud files
     try:
         creds_file = os.path.expanduser(CREDENTIALS)
+        # the region can be passed in with kwarg
         pyrax.set_credential_file(creds_file, region="DFW")
     except pyrax.exceptions.FileNotFound, e:
         print("Setup the ~/.rackspace_cloud_credentials file with this info.")
@@ -67,7 +68,9 @@ def main():
     file_name_to_upload = os.path.basename(upload_this)
     print(file_name_to_upload)
 
+    # check for new file and upload it or dont.
     if is_new_file_to_upload(file_name_to_upload, cont_files):
+        # new file so upload it
         print("Uploading file...")
         cont.upload_file(upload_this)
         print(cont.get_objects())
@@ -79,7 +82,7 @@ def main():
 
 
 def is_new_file_to_upload(file_name, containter_files):
-        # validate the file is not already in the container
+        """ validate the file is not already in the container. """
         name_list = [f.name for f in containter_files]
         if file_name in name_list:
             return 0
